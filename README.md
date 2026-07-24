@@ -8,6 +8,9 @@ through **New**, **Contacted**, and **Closed**.
 Built by **Mousumi Swain** for the Digital Heroes Full Stack Development
 internship task.
 
+- **Live application:** https://leaddesk-mini-digital-heroes.vercel.app
+- **Public source:** https://github.com/mousumi2004/leaddesk-mini-digital-heroes
+
 ## Assignment coverage
 
 - Public form with name, email, budget, and project message
