@@ -23,6 +23,15 @@ type LeadsResponse = {
   error?: string;
 };
 
+type StatusFilter = "all" | LeadStatus;
+
+const statusFilters: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "new", label: "New" },
+  { value: "contacted", label: "Contacted" },
+  { value: "closed", label: "Closed" },
+];
+
 async function requestLeads(): Promise<LeadRecord[]> {
   const response = await fetch("/api/leads", { cache: "no-store" });
   const body = (await response.json()) as LeadsResponse;
@@ -39,6 +48,7 @@ async function requestLeads(): Promise<LeadRecord[]> {
 export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
   const [leads, setLeads] = useState<LeadRecord[]>([]);
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState("");
@@ -89,15 +99,18 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
 
   const filteredLeads = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) {
-      return leads;
-    }
-    return leads.filter(
-      (lead) =>
+
+    return leads.filter((lead) => {
+      const matchesStatus =
+        statusFilter === "all" || lead.status === statusFilter;
+      const matchesQuery =
+        !normalized ||
         lead.name.toLowerCase().includes(normalized) ||
-        lead.email.toLowerCase().includes(normalized),
-    );
-  }, [leads, query]);
+        lead.email.toLowerCase().includes(normalized);
+
+      return matchesStatus && matchesQuery;
+    });
+  }, [leads, query, statusFilter]);
 
   const counts = useMemo(
     () => ({
@@ -205,6 +218,27 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
               <h2 id="leads-title">Project enquiries</h2>
               <p>{filteredLeads.length} visible leads</p>
             </div>
+            <div
+              className="status-filters"
+              role="group"
+              aria-label="Filter leads by status"
+            >
+              {statusFilters.map((filter) => (
+                <button
+                  type="button"
+                  key={filter.value}
+                  aria-pressed={statusFilter === filter.value}
+                  onClick={() => setStatusFilter(filter.value)}
+                >
+                  {filter.label}
+                  <span aria-hidden="true">
+                    {filter.value === "all"
+                      ? counts.total
+                      : counts[filter.value]}
+                  </span>
+                </button>
+              ))}
+            </div>
             <div className="toolbar-actions">
               <label className="search-control">
                 <Search aria-hidden="true" size={17} />
@@ -253,7 +287,7 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
             <div className="dashboard-state">
               <Search aria-hidden="true" />
               <h3>No matching leads</h3>
-              <p>Try a different name or email address.</p>
+              <p>Change the status filter or search term and try again.</p>
             </div>
           ) : (
             <div className="lead-table" role="table" aria-label="Project leads">

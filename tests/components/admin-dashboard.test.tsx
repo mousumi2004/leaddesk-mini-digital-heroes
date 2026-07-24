@@ -26,6 +26,17 @@ const leads: LeadRecord[] = [
     createdAt: "2026-07-23T10:00:00.000Z",
     updatedAt: "2026-07-24T09:00:00.000Z",
   },
+  {
+    id: "lead-3",
+    name: "Nisha Rao",
+    email: "nisha@example.com",
+    budget: "10000-plus",
+    message:
+      "We need a multi-market e-commerce platform for our homeware brand.",
+    status: "closed",
+    createdAt: "2026-07-22T10:00:00.000Z",
+    updatedAt: "2026-07-24T08:00:00.000Z",
+  },
 ];
 
 afterEach(() => {
@@ -51,10 +62,10 @@ describe("AdminDashboard", () => {
 
     expect(await screen.findByText("Mousumi Swain")).toBeVisible();
     expect(screen.getByText("Aarav Patel")).toBeVisible();
-    expect(screen.getByTestId("count-total")).toHaveTextContent("2");
+    expect(screen.getByTestId("count-total")).toHaveTextContent("3");
     expect(screen.getByTestId("count-new")).toHaveTextContent("1");
     expect(screen.getByTestId("count-contacted")).toHaveTextContent("1");
-    expect(screen.getByTestId("count-closed")).toHaveTextContent("0");
+    expect(screen.getByTestId("count-closed")).toHaveTextContent("1");
   });
 
   it("searches leads by name or email", async () => {
@@ -67,6 +78,43 @@ describe("AdminDashboard", () => {
 
     expect(screen.getByText("Mousumi Swain")).toBeVisible();
     expect(screen.queryByText("Aarav Patel")).not.toBeInTheDocument();
+  });
+
+  it("filters leads by status", async () => {
+    mockInitialLeads();
+    render(<AdminDashboard adminEmail="admin@example.com" />);
+    const user = userEvent.setup();
+    await screen.findByText("Mousumi Swain");
+
+    await user.click(
+      screen.getByRole("button", { name: "Closed", exact: true }),
+    );
+
+    expect(screen.getByText("Nisha Rao")).toBeVisible();
+    expect(screen.queryByText("Mousumi Swain")).not.toBeInTheDocument();
+    expect(screen.queryByText("Aarav Patel")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Closed", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("combines status filtering with search", async () => {
+    mockInitialLeads();
+    render(<AdminDashboard adminEmail="admin@example.com" />);
+    const user = userEvent.setup();
+    await screen.findByText("Mousumi Swain");
+
+    await user.click(
+      screen.getByRole("button", { name: "Contacted", exact: true }),
+    );
+    await user.type(screen.getByRole("searchbox"), "mousumi");
+
+    expect(screen.getByText("No matching leads")).toBeVisible();
+    expect(
+      screen.getByText(
+        "Change the status filter or search term and try again.",
+      ),
+    ).toBeVisible();
   });
 
   it("saves a permitted status change", async () => {
