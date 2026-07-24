@@ -129,3 +129,72 @@ test("production journey stores, searches, and updates a lead", async ({
   await page.getByRole("searchbox").fill(leadEmail);
   await expect(page.getByLabel(`Status for ${leadName}`)).toHaveValue("closed");
 });
+
+test("captures verified production evidence", async ({ browser }) => {
+  const email = process.env.E2E_ADMIN_EMAIL;
+  const password = process.env.E2E_ADMIN_PASSWORD;
+  const shouldCapture = process.env.E2E_CAPTURE_EVIDENCE === "1";
+  test.skip(
+    !shouldCapture || !email || !password,
+    "Production screenshot capture is opt-in.",
+  );
+
+  const desktop = await browser.newPage({
+    viewport: { width: 1440, height: 1024 },
+  });
+  await desktop.goto("/");
+  await expect(
+    desktop.getByRole("heading", { name: /Turn a project idea/ }),
+  ).toBeVisible();
+  await desktop.screenshot({
+    path: "output/playwright/public-desktop.png",
+  });
+
+  await desktop.goto("/login");
+  await expect(
+    desktop.getByRole("heading", { name: "Administrator login" }),
+  ).toBeVisible();
+  await desktop.screenshot({
+    path: "output/playwright/login-desktop.png",
+  });
+
+  await desktop.getByLabel("Email").fill(email!);
+  await desktop.getByLabel("Password", { exact: true }).fill(password!);
+  const sessionResponsePromise = desktop.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/auth/session") &&
+      response.request().method() === "POST",
+  );
+  await desktop.getByRole("button", { name: "Sign in securely" }).click();
+  const sessionResponse = await sessionResponsePromise;
+  expect(sessionResponse.ok()).toBeTruthy();
+  await expect(desktop).toHaveURL(/\/admin$/, { timeout: 10_000 });
+  await expect(
+    desktop.getByRole("heading", { name: "Project enquiries" }),
+  ).toBeVisible();
+  await expect(
+    desktop.getByText("Loading project enquiries..."),
+  ).not.toBeVisible({ timeout: 10_000 });
+  await expect(desktop.getByTestId("count-total")).not.toHaveText("0");
+  await desktop.screenshot({
+    path: "output/playwright/admin-desktop.png",
+    mask: [
+      desktop.getByText(email!, { exact: true }),
+      desktop.locator('a[href^="mailto:"]'),
+    ],
+    maskColor: "#e7edf6",
+  });
+  await desktop.close();
+
+  const mobile = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+  });
+  await mobile.goto("/");
+  await expect(
+    mobile.getByRole("heading", { name: /Turn a project idea/ }),
+  ).toBeVisible();
+  await mobile.screenshot({
+    path: "output/playwright/public-mobile.png",
+  });
+  await mobile.close();
+});

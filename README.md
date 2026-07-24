@@ -11,6 +11,16 @@ internship task.
 - **Live application:** https://leaddesk-mini-digital-heroes.vercel.app
 - **Public source:** https://github.com/mousumi2004/leaddesk-mini-digital-heroes
 
+## Product preview
+
+### Public lead intake
+
+![LeadDesk Mini public lead form](output/playwright/public-desktop.png)
+
+### Protected administrator dashboard
+
+![LeadDesk Mini administrator dashboard](output/playwright/admin-desktop.png)
+
 ## Assignment coverage
 
 - Public form with name, email, budget, and project message
@@ -18,10 +28,11 @@ internship task.
 - Real Firestore persistence
 - Protected administrator login with Firebase Authentication
 - HTTP-only server session cookie with CSRF and same-origin protection
-- Administrator lead list and email/name search
+- Administrator lead list with combined email/name search and status filters
 - Status workflow: New → Contacted → Closed
+- Expandable, read-only project briefs for longer customer requirements
 - Submitted contact details remain read-only in the dashboard
-- Responsive original interface
+- Responsive original interface with keyboard-aware form navigation
 - Exact linked footer credit required by the task
 
 ## Technology
