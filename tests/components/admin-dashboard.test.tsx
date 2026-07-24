@@ -87,14 +87,14 @@ describe("AdminDashboard", () => {
     await screen.findByText("Mousumi Swain");
 
     await user.click(
-      screen.getByRole("button", { name: "Closed", exact: true }),
+      screen.getByRole("button", { name: "Closed" }),
     );
 
     expect(screen.getByText("Nisha Rao")).toBeVisible();
     expect(screen.queryByText("Mousumi Swain")).not.toBeInTheDocument();
     expect(screen.queryByText("Aarav Patel")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Closed", exact: true }),
+      screen.getByRole("button", { name: "Closed" }),
     ).toHaveAttribute("aria-pressed", "true");
   });
 
@@ -105,7 +105,7 @@ describe("AdminDashboard", () => {
     await screen.findByText("Mousumi Swain");
 
     await user.click(
-      screen.getByRole("button", { name: "Contacted", exact: true }),
+      screen.getByRole("button", { name: "Contacted" }),
     );
     await user.type(screen.getByRole("searchbox"), "mousumi");
 
