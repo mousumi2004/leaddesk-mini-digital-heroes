@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // LeadDesk Mini uses the Firebase Admin SDK exclusively from authenticated
+    // server routes. Browser clients receive no direct Firestore access.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
