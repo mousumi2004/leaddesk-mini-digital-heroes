@@ -42,7 +42,7 @@ export const leadInputSchema = z
       .trim()
       .min(10, "Tell us a little more about the project.")
       .max(1000, "Keep the message under 1,000 characters."),
-    company: z.string().max(0, "Automated submission rejected.").optional().default(""),
+    company: z.string().max(0, "Automated submission rejected.").optional(),
   })
   .strict();
 
