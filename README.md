@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LeadDesk Mini
 
-## Getting Started
+LeadDesk Mini is a compact lead-management application for a small digital
+agency. A prospective customer can submit a website or e-commerce enquiry, and
+an authorized administrator can securely review, search, and move the lead
+through **New**, **Contacted**, and **Closed**.
 
-First, run the development server:
+Built by **Mousumi Swain** for the Digital Heroes Full Stack Development
+internship task.
+
+## Assignment coverage
+
+- Public form with name, email, budget, and project message
+- Client-side and server-side validation
+- Real Firestore persistence
+- Protected administrator login with Firebase Authentication
+- HTTP-only server session cookie with CSRF and same-origin protection
+- Administrator lead list and email/name search
+- Status workflow: New → Contacted → Closed
+- Submitted contact details remain read-only in the dashboard
+- Responsive original interface
+- Exact linked footer credit required by the task
+
+## Technology
+
+- Next.js 16 App Router and TypeScript
+- React Hook Form and Zod
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Admin SDK for server-only database access
+- Vitest, Testing Library, and Playwright
+- Vercel for deployment
+
+Firebase was selected because the task explicitly permits it and it provides a
+real database plus authentication within the free Spark plan. Next.js keeps the
+public interface, protected server routes, and deployment in one typed
+codebase.
+
+## How the data works
+
+Public submissions are sent to `POST /api/leads`. The server validates and
+normalizes the request before creating a document in the `leads` collection.
+
+Each lead contains:
+
+| Field | Purpose |
+| --- | --- |
+| `name` | Customer name |
+| `email` | Normalized customer email |
+| `budget` | Selected budget range |
+| `message` | Project requirements |
+| `status` | `new`, `contacted`, or `closed` |
+| `createdAt` | Server-generated submission time |
+| `updatedAt` | Server-generated last-change time |
+
+The dashboard only permits status updates. It does not offer controls for
+rewriting a customer's submitted name, email, budget, or message.
+
+## How authentication works
+
+1. Firebase verifies the administrator's email and password in the browser.
+2. The browser sends the fresh Firebase ID token with a CSRF token to the
+   server.
+3. The server verifies the token and confirms that the user's UID exists in the
+   Firestore `admins` collection with the `admin` role.
+4. The server issues a five-day HTTP-only, same-site, secure session cookie.
+5. Every dashboard read or status update verifies that session and role again.
+
+Firestore browser rules deny all direct reads and writes. Database operations
+go through validated server endpoints using the Admin SDK.
+
+## Run locally
+
+Requirements: Node.js 20+ and pnpm.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+Copy-Item .env.example .env.local
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Fill `.env.local` with the Firebase web application and service-account values
+described in [docs/database-setup.md](docs/database-setup.md). Then open
+`http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To provision an administrator:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+$env:ADMIN_EMAIL="admin@example.com"
+$env:ADMIN_PASSWORD="use-a-strong-password"
+pnpm provision:admin
+```
 
-## Learn More
+Environment files, private keys, generated reviewer credentials, test results,
+and build output are excluded from Git.
 
-To learn more about Next.js, take a look at the following resources:
+## Verification
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm verify
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`pnpm verify` runs ESLint, TypeScript, unit/component/API tests, and the
+production build. The Playwright suite checks the public form, fresh-browser
+route protection, and—when administrator environment variables are
+provided—the complete persisted lead workflow.
 
-## Deploy on Vercel
+## AI use
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+I used AI to brainstorm the product framing, review the assignment checklist,
+help scaffold and test the implementation, and identify security and
+accessibility edge cases. I made the final decisions about the workflow,
+visual direction, copy, data permissions, and technology choices, and I
+verified the completed behavior with automated tests and fresh-browser flows.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Required credit
+
+The visible footer links
+**[Built for Digital Heroes Training Task](https://digitalheroesco.com)**.

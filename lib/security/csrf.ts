@@ -20,5 +20,28 @@ export function tokensMatch(left: string, right: string): boolean {
 
 export function requestIsSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
-  return origin === null || origin === new URL(request.url).origin;
+  if (origin === null) {
+    return true;
+  }
+
+  let originUrl: URL;
+  try {
+    originUrl = new URL(origin);
+  } catch {
+    return false;
+  }
+
+  const requestUrl = new URL(request.url);
+  const forwardedHost = request.headers
+    .get("x-forwarded-host")
+    ?.split(",")[0]
+    ?.trim();
+  const host = forwardedHost || request.headers.get("host") || requestUrl.host;
+  const forwardedProtocol = request.headers
+    .get("x-forwarded-proto")
+    ?.split(",")[0]
+    ?.trim();
+  const protocol = forwardedProtocol || requestUrl.protocol.replace(":", "");
+
+  return originUrl.host === host && originUrl.protocol === `${protocol}:`;
 }

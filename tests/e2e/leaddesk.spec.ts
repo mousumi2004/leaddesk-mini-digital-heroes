@@ -49,18 +49,56 @@ test("production journey stores, searches, and updates a lead", async ({
   await page
     .getByLabel("Project details")
     .fill("I need a responsive Shopify storefront for a clothing brand.");
+  const leadResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/leads") &&
+      response.request().method() === "POST",
+  );
   await page.getByRole("button", { name: "Send project request" }).click();
-  await expect(page.getByRole("status")).toContainText("received");
+  const leadResponse = await leadResponsePromise;
+  if (!leadResponse.ok()) {
+    const body = (await leadResponse.json()) as { error?: string };
+    throw new Error(
+      `Lead creation failed (${leadResponse.status()}): ${body.error ?? "Unknown error"}`,
+    );
+  }
+  await expect(page.getByRole("status")).toContainText("received", {
+    timeout: 10_000,
+  });
 
   await page.goto("/login");
   await page.getByLabel("Email").fill(email!);
-  await page.getByLabel("Password").fill(password!);
+  await page.getByLabel("Password", { exact: true }).fill(password!);
+  const sessionResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/auth/session") &&
+      response.request().method() === "POST",
+  );
   await page.getByRole("button", { name: "Sign in securely" }).click();
+  const sessionResponse = await sessionResponsePromise;
+  if (!sessionResponse.ok()) {
+    const body = (await sessionResponse.json()) as { error?: string };
+    throw new Error(
+      `Session creation failed (${sessionResponse.status()}): ${body.error ?? "Unknown error"}`,
+    );
+  }
   await expect(page).toHaveURL(/\/admin$/);
 
   await page.getByRole("searchbox").fill(leadEmail);
   await expect(page.getByText(leadName)).toBeVisible();
+  const statusResponsePromise = page.waitForResponse(
+    (response) =>
+      /\/api\/leads\/[^/]+$/.test(new URL(response.url()).pathname) &&
+      response.request().method() === "PATCH",
+  );
   await page.getByLabel(`Status for ${leadName}`).selectOption("closed");
+  const statusResponse = await statusResponsePromise;
+  if (!statusResponse.ok()) {
+    const body = (await statusResponse.json()) as { error?: string };
+    throw new Error(
+      `Status update failed (${statusResponse.status()}): ${body.error ?? "Unknown error"}`,
+    );
+  }
   await expect(page.getByLabel(`Status for ${leadName}`)).toHaveValue("closed");
   await page.reload();
   await page.getByRole("searchbox").fill(leadEmail);
