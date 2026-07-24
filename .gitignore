@@ -37,6 +37,7 @@ yarn-error.log*
 # local task artifacts and worktrees
 /tmp/
 /.worktrees/
+/.playwright-cli/
 
 # vercel
 .vercel
