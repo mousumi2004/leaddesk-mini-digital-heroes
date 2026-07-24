@@ -9,7 +9,7 @@ import {
 const validLead = {
   name: "  Mousumi Swain  ",
   email: "  MOUSUMI@EXAMPLE.COM ",
-  budget: "1000-5000",
+  budget: "1000-5000" as const,
   message: "  I need a responsive Shopify storefront for my clothing brand.  ",
   company: "",
 };
