@@ -8,6 +8,13 @@ test("public page contains the required form, validation, and exact credit", asy
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Turn a project idea",
   );
+  const formJump = page.getByRole("link", { name: "Share your project" });
+  await expect(formJump).toHaveAttribute("href", "#project-form");
+  await formJump.click();
+  await expect(
+    page.getByRole("heading", { name: "Tell us what you're building." }),
+  ).toBeFocused();
+
   await expect(page.getByLabel("Name")).toBeVisible();
   await expect(page.getByLabel("Email")).toBeVisible();
   await expect(page.getByLabel("Budget range")).toBeVisible();
@@ -86,6 +93,21 @@ test("production journey stores, searches, and updates a lead", async ({
 
   await page.getByRole("searchbox").fill(leadEmail);
   await expect(page.getByText(leadName)).toBeVisible();
+  await page.getByRole("button", { name: "New" }).click();
+  await expect(page.getByText(leadName)).toBeVisible();
+
+  await page
+    .getByRole("button", { name: `View full brief from ${leadName}` })
+    .click();
+  await expect(
+    page.getByRole("region", {
+      name: `Full project brief from ${leadName}`,
+    }),
+  ).toContainText(
+    "I need a responsive Shopify storefront for a clothing brand.",
+  );
+  await page.getByRole("button", { name: "All" }).click();
+
   const statusResponsePromise = page.waitForResponse(
     (response) =>
       /\/api\/leads\/[^/]+$/.test(new URL(response.url()).pathname) &&
@@ -100,6 +122,9 @@ test("production journey stores, searches, and updates a lead", async ({
     );
   }
   await expect(page.getByLabel(`Status for ${leadName}`)).toHaveValue("closed");
+  await page.getByRole("button", { name: "Closed" }).click();
+  await expect(page.getByText(leadName)).toBeVisible();
+
   await page.reload();
   await page.getByRole("searchbox").fill(leadEmail);
   await expect(page.getByLabel(`Status for ${leadName}`)).toHaveValue("closed");
