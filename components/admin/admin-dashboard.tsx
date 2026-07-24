@@ -49,6 +49,9 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
   const [leads, setLeads] = useState<LeadRecord[]>([]);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [expandedLeadIds, setExpandedLeadIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState("");
@@ -160,6 +163,18 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
     } finally {
       setSavingId("");
     }
+  }
+
+  function toggleLeadDetails(leadId: string) {
+    setExpandedLeadIds((current) => {
+      const next = new Set(current);
+      if (next.has(leadId)) {
+        next.delete(leadId);
+      } else {
+        next.add(leadId);
+      }
+      return next;
+    });
   }
 
   async function logout() {
@@ -309,7 +324,31 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
                         <Mail aria-hidden="true" size={13} />
                         {lead.email}
                       </a>
-                      <p>{lead.message}</p>
+                      <p className="lead-message-preview">{lead.message}</p>
+                      <button
+                        className="lead-details-toggle"
+                        type="button"
+                        aria-expanded={expandedLeadIds.has(lead.id)}
+                        aria-controls={`lead-details-${lead.id}`}
+                        aria-label={`${
+                          expandedLeadIds.has(lead.id) ? "Hide" : "View"
+                        } full brief from ${lead.name}`}
+                        onClick={() => toggleLeadDetails(lead.id)}
+                      >
+                        {expandedLeadIds.has(lead.id)
+                          ? "Hide full brief"
+                          : "View full brief"}
+                      </button>
+                      {expandedLeadIds.has(lead.id) ? (
+                        <div
+                          className="lead-details"
+                          id={`lead-details-${lead.id}`}
+                          role="region"
+                          aria-label={`Full project brief from ${lead.name}`}
+                        >
+                          <p>{lead.message}</p>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                   <div className="mobile-label" aria-hidden="true">

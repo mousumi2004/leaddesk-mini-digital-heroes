@@ -117,6 +117,37 @@ describe("AdminDashboard", () => {
     ).toBeVisible();
   });
 
+  it("expands and collapses the complete project brief", async () => {
+    mockInitialLeads();
+    render(<AdminDashboard adminEmail="admin@example.com" />);
+    const user = userEvent.setup();
+    await screen.findByText("Mousumi Swain");
+
+    const toggle = screen.getByRole("button", {
+      name: "View full brief from Mousumi Swain",
+    });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("region", {
+        name: "Full project brief from Mousumi Swain",
+      }),
+    ).not.toBeInTheDocument();
+
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("region", {
+        name: "Full project brief from Mousumi Swain",
+      }),
+    ).toHaveTextContent(
+      "I need a responsive Shopify storefront for my clothing brand.",
+    );
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("saves a permitted status change", async () => {
     const fetchMock = vi
       .fn()
