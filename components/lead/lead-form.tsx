@@ -86,7 +86,9 @@ export function LeadForm() {
     <form className="lead-form" onSubmit={submit} noValidate>
       <div className="form-heading">
         <span className="eyebrow">Start a conversation</span>
-        <h2>Tell us what you&apos;re building.</h2>
+        <h2 id="project-form" tabIndex={-1}>
+          Tell us what you&apos;re building.
+        </h2>
         <p>Share the essentials. A project specialist can take it from there.</p>
       </div>
 

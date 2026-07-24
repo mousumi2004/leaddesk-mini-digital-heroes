@@ -1,5 +1,4 @@
 import {
-  ArrowDown,
   Check,
   LayoutDashboard,
   MessageSquareText,
@@ -8,6 +7,7 @@ import {
 import Link from "next/link";
 
 import { LeadForm } from "@/components/lead/lead-form";
+import { FormJumpLink } from "@/components/site/form-jump-link";
 
 const benefits = [
   "Clear project details from the first message",
@@ -20,7 +20,7 @@ export default function Home() {
     <>
       <header className="site-header">
         <div className="header-inner">
-          <Link className="brand" href="/" aria-label="LeadDesk Mini home">
+          <Link className="brand" href="/">
             <span className="brand-mark" aria-hidden="true">
               L
             </span>
@@ -64,13 +64,10 @@ export default function Home() {
                 ))}
               </ul>
 
-              <a className="text-link" href="#project-form">
-                Share your project
-                <ArrowDown aria-hidden="true" size={17} />
-              </a>
+              <FormJumpLink />
             </div>
 
-            <div id="project-form" className="form-shell">
+            <div className="form-shell">
               <div className="form-accent" />
               <LeadForm />
             </div>
@@ -84,19 +81,25 @@ export default function Home() {
           </div>
           <div className="process-grid">
             <article>
-              <span className="step-number">01</span>
+              <span className="step-number" aria-hidden="true">
+                01
+              </span>
               <MessageSquareText aria-hidden="true" />
               <h3>Share the brief</h3>
               <p>A potential client describes the project, budget, and goal.</p>
             </article>
             <article>
-              <span className="step-number">02</span>
+              <span className="step-number" aria-hidden="true">
+                02
+              </span>
               <ShieldCheck aria-hidden="true" />
               <h3>Review securely</h3>
               <p>Only an authorized administrator can view the submitted lead.</p>
             </article>
             <article>
-              <span className="step-number">03</span>
+              <span className="step-number" aria-hidden="true">
+                03
+              </span>
               <LayoutDashboard aria-hidden="true" />
               <h3>Track progress</h3>
               <p>The team marks each lead as New, Contacted, or Closed.</p>

@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-inner">
-        <Link className="brand small" href="/" aria-label="LeadDesk Mini home">
+        <Link className="brand small" href="/">
           <span className="brand-mark" aria-hidden="true">
             L
           </span>
