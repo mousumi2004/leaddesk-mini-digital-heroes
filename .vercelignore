@@ -1,0 +1,7 @@
+.worktrees/
+submission-package/
+submission-ready/
+submission-private/
+test-results/
+playwright-report/
+tmp/
