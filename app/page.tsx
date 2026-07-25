@@ -21,9 +21,6 @@ export default function Home() {
       <header className="site-header">
         <div className="header-inner">
           <Link className="brand" href="/">
-            <span className="brand-mark" aria-hidden="true">
-              L
-            </span>
             <span>LeadDesk Mini</span>
           </Link>
           <Link className="admin-link" href="/login">

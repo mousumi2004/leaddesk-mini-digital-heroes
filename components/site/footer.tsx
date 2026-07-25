@@ -1,15 +1,8 @@
-import Link from "next/link";
-
 export function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-inner">
-        <Link className="brand small" href="/">
-          <span className="brand-mark" aria-hidden="true">
-            L
-          </span>
-          <span>LeadDesk Mini</span>
-        </Link>
+        <span className="brand small">LeadDesk Mini</span>
         <a
           className="training-credit"
           href="https://digitalheroesco.com"
