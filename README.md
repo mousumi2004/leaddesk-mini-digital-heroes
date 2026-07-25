@@ -21,6 +21,10 @@ internship task.
 
 ![LeadDesk Mini administrator dashboard](output/playwright/admin-desktop.png)
 
+### Focused full-brief review
+
+![LeadDesk Mini full project brief pane](output/playwright/admin-brief-desktop.png)
+
 ## Assignment coverage
 
 - Public form with name, email, budget, and project message
@@ -30,9 +34,10 @@ internship task.
 - HTTP-only server session cookie with CSRF and same-origin protection
 - Administrator lead list with combined email/name search and status filters
 - Status workflow: New → Contacted → Closed
-- Expandable, read-only project briefs for longer customer requirements
+- Large, scrollable full-brief pane with budget, date, status, and contact details
 - Submitted contact details remain read-only in the dashboard
-- Responsive original interface with keyboard-aware form navigation
+- Responsive original sage-and-forest interface with restrained motion
+- Keyboard-accessible brief pane with Escape, backdrop, and close-button support
 - Exact linked footer credit required by the task
 
 ## Technology

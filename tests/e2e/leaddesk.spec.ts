@@ -99,13 +99,15 @@ test("production journey stores, searches, and updates a lead", async ({
   await page
     .getByRole("button", { name: `View full brief from ${leadName}` })
     .click();
-  await expect(
-    page.getByRole("region", {
-      name: `Full project brief from ${leadName}`,
-    }),
-  ).toContainText(
+  const briefDialog = page.getByRole("dialog", {
+    name: `Project brief from ${leadName}`,
+  });
+  await expect(briefDialog).toContainText(
     "I need a responsive Shopify storefront for a clothing brand.",
   );
+  await expect(briefDialog).toContainText(leadEmail);
+  await page.getByRole("button", { name: "Close project brief" }).click();
+  await expect(briefDialog).not.toBeVisible();
   await page.getByRole("button", { name: "All" }).click();
 
   const statusResponsePromise = page.waitForResponse(
@@ -184,6 +186,20 @@ test("captures verified production evidence", async ({ browser }) => {
     ],
     maskColor: "#e7edf6",
   });
+  await desktop
+    .getByRole("button", { name: /View full brief from/ })
+    .first()
+    .click();
+  await expect(desktop.getByRole("dialog")).toBeVisible();
+  await desktop.screenshot({
+    path: "output/playwright/admin-brief-desktop.png",
+    mask: [
+      desktop.getByText(email!, { exact: true }),
+      desktop.locator('a[href^="mailto:"]'),
+    ],
+    maskColor: "#e7edf6",
+  });
+  await desktop.getByRole("button", { name: "Close project brief" }).click();
   await desktop.close();
 
   const mobile = await browser.newPage({
