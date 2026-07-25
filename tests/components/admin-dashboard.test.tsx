@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -117,35 +117,78 @@ describe("AdminDashboard", () => {
     ).toBeVisible();
   });
 
-  it("expands and collapses the complete project brief", async () => {
+  it("opens the selected lead in a complete project brief dialog", async () => {
     mockInitialLeads();
     render(<AdminDashboard adminEmail="admin@example.com" />);
     const user = userEvent.setup();
     await screen.findByText("Mousumi Swain");
 
-    const toggle = screen.getByRole("button", {
+    await user.click(screen.getByRole("button", {
       name: "View full brief from Mousumi Swain",
+    }));
+
+    const dialog = screen.getByRole("dialog", {
+      name: "Project brief from Mousumi Swain",
     });
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect(
-      screen.queryByRole("region", {
-        name: "Full project brief from Mousumi Swain",
-      }),
-    ).not.toBeInTheDocument();
-
-    await user.click(toggle);
-
-    expect(toggle).toHaveAttribute("aria-expanded", "true");
-    expect(
-      screen.getByRole("region", {
-        name: "Full project brief from Mousumi Swain",
-      }),
-    ).toHaveTextContent(
+    expect(dialog).toBeVisible();
+    expect(within(dialog).getByText("mousumi@example.com")).toBeVisible();
+    expect(within(dialog).getByText("$1,000 - $5,000")).toBeVisible();
+    expect(within(dialog).getByText("New")).toBeVisible();
+    expect(dialog).toHaveTextContent(
       "I need a responsive Shopify storefront for my clothing brand.",
     );
+  });
 
-    await user.click(toggle);
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
+  it("closes the project brief and restores focus to its trigger", async () => {
+    mockInitialLeads();
+    render(<AdminDashboard adminEmail="admin@example.com" />);
+    const user = userEvent.setup();
+    await screen.findByText("Mousumi Swain");
+
+    const trigger = screen.getByRole("button", {
+      name: "View full brief from Mousumi Swain",
+    });
+    await user.click(trigger);
+    await user.click(
+      screen.getByRole("button", { name: "Close project brief" }),
+    );
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
+  it("closes the project brief with Escape", async () => {
+    mockInitialLeads();
+    render(<AdminDashboard adminEmail="admin@example.com" />);
+    const user = userEvent.setup();
+    await screen.findByText("Mousumi Swain");
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "View full brief from Mousumi Swain",
+      }),
+    );
+    expect(screen.getByRole("dialog")).toBeVisible();
+
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("closes the project brief from the blurred backdrop", async () => {
+    mockInitialLeads();
+    render(<AdminDashboard adminEmail="admin@example.com" />);
+    const user = userEvent.setup();
+    await screen.findByText("Mousumi Swain");
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "View full brief from Mousumi Swain",
+      }),
+    );
+    await user.click(screen.getByTestId("lead-dialog-backdrop"));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("saves a permitted status change", async () => {

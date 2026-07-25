@@ -8,8 +8,9 @@ import {
   Search,
   Users,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { LeadDetailDialog } from "@/components/admin/lead-detail-dialog";
 import {
   budgetLabels,
   leadStatuses,
@@ -49,9 +50,8 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
   const [leads, setLeads] = useState<LeadRecord[]>([]);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [expandedLeadIds, setExpandedLeadIds] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const [selectedLead, setSelectedLead] = useState<LeadRecord | null>(null);
+  const returnFocusRef = useRef<HTMLButtonElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState("");
@@ -165,17 +165,15 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
     }
   }
 
-  function toggleLeadDetails(leadId: string) {
-    setExpandedLeadIds((current) => {
-      const next = new Set(current);
-      if (next.has(leadId)) {
-        next.delete(leadId);
-      } else {
-        next.add(leadId);
-      }
-      return next;
-    });
+  function openLeadDetails(lead: LeadRecord, trigger: HTMLButtonElement) {
+    returnFocusRef.current = trigger;
+    setSelectedLead(lead);
   }
+
+  const closeLeadDetails = useCallback(() => {
+    setSelectedLead(null);
+    window.requestAnimationFrame(() => returnFocusRef.current?.focus());
+  }, []);
 
   async function logout() {
     await fetch("/api/auth/session", { method: "DELETE" });
@@ -328,27 +326,13 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
                       <button
                         className="lead-details-toggle"
                         type="button"
-                        aria-expanded={expandedLeadIds.has(lead.id)}
-                        aria-controls={`lead-details-${lead.id}`}
-                        aria-label={`${
-                          expandedLeadIds.has(lead.id) ? "Hide" : "View"
-                        } full brief from ${lead.name}`}
-                        onClick={() => toggleLeadDetails(lead.id)}
+                        aria-label={`View full brief from ${lead.name}`}
+                        onClick={(event) =>
+                          openLeadDetails(lead, event.currentTarget)
+                        }
                       >
-                        {expandedLeadIds.has(lead.id)
-                          ? "Hide full brief"
-                          : "View full brief"}
+                        View full brief
                       </button>
-                      {expandedLeadIds.has(lead.id) ? (
-                        <div
-                          className="lead-details"
-                          id={`lead-details-${lead.id}`}
-                          role="region"
-                          aria-label={`Full project brief from ${lead.name}`}
-                        >
-                          <p>{lead.message}</p>
-                        </div>
-                      ) : null}
                     </div>
                   </div>
                   <div className="mobile-label" aria-hidden="true">
@@ -392,6 +376,9 @@ export function AdminDashboard({ adminEmail }: { adminEmail: string }) {
           )}
         </section>
       </div>
+      {selectedLead ? (
+        <LeadDetailDialog lead={selectedLead} onClose={closeLeadDetails} />
+      ) : null}
     </main>
   );
 }
